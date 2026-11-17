@@ -18,7 +18,7 @@ export const FIXED = {
   locOuterX: -37.15, locOuterY: -78.14, locOuterR: 12.05, locSideY: -63.89,
   legX: -36.2, legY: -57.5, legEnd: { bottom: -24.2, top: -22.9 },
   squeeze: 0.1, pocketInset: 1.0, padInset: 1.5, recessClear: 0.3,
-  vent: { d: 2, px: 2.6, py: 1.495, x0: -33.8, y0: -74.75, xmax: 31.2, web: 1, windowWeb: 1.5, locatorWeb: 0.5,
+  vent: { d: 4, px: 3.5, py: 2.75, x0: -33.8, y0: -74.75, xmax: 31.2, web: 1, windowWeb: 1.5, locatorWeb: 0.5,
           bay: [-36.1, 36.1, -77.09, 77.09, 11.0] },
 };
 const TAB = [[[38.0, -27.5], [42.2, -27.5], [43.0, -26.7], [43.0, 26.7], [42.2, 27.5], [38.0, 27.5]], [0, 0.3, 0.3, 0.3, 0.3, 0]];

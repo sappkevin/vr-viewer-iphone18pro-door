@@ -8,8 +8,8 @@ Generated with the [CardboardXR door generator](https://brenpoly.github.io/Cardb
 
 | Variant | Vents | Description |
 |---|---|---|
-| **Standard** | 915 diamond | Door with camera opening, hinge knuckles, latch |
-| **MagSafe** | 454 diamond | Standard door + ø58mm MagSafe cooler opening with a solid ring border |
+| **Standard** | 332 diamond | Door with camera opening, hinge knuckles, latch |
+| **MagSafe** | 144 diamond | Standard door + ø58mm MagSafe cooler opening with a solid ring border |
 
 Each variant ships as a door STL and a combined 3MF (door + 4 TPU locators). The four
 TPU corner locators are shared between variants (one set of STLs).
@@ -17,9 +17,16 @@ TPU corner locators are shared between variants (one set of STLs).
 ## Vent Pattern
 
 Diamond (square rotated 45°) holes instead of circles. For these vertical through-holes
-printed outer-face-down, diamonds give straight toolpaths (faster, less stringing across
-~900 holes) and uniform wall thickness between holes — circles pinch to a thin web where
-they're closest. Each diamond is 2mm point-to-point with ~1.5mm walls between.
+printed outer-face-down, diamonds give straight toolpaths and uniform wall thickness
+between holes — circles pinch to a thin web where they're closest.
+
+Each diamond is **4mm point-to-point** on a 3.5 × 2.75mm checkerboard, giving ~1.5mm
+minimum walls and ~41% open area. This is deliberately coarse: an earlier 2mm / ~900-hole
+field caused heavy PETG stringing and filament pile-ups because the nozzle had to hop
+between hundreds of tiny islands on every layer (and the small first-layer islands adhered
+poorly). The coarser field cuts hole count to ~330 (standard) / ~140 (MagSafe) — far fewer
+travel moves — while *increasing* airflow, and leaves more contiguous first-layer material
+for bed adhesion.
 
 ## Printing
 
