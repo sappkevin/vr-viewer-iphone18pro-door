@@ -4,13 +4,22 @@ Remix of the [Mobile VR Viewer for Modern Smartphones](https://makerworld.com/en
 
 Generated with the [CardboardXR door generator](https://brenpoly.github.io/CardboardXR/door-generator/) using Manifold CSG — proper boolean geometry, watertight mesh, no manual modeling artifacts.
 
-## What's Included
+## Variants
 
-| File | Material | Description |
+| Variant | Vents | Description |
 |---|---|---|
-| Door (PETG, outer face down) | PETG | Door with 1,011 circular vent holes, camera opening, hinge knuckles, latch |
-| TPU locator × 4 | TPU | Corner grip pads with dovetail pockets |
-| 3MF (PETG + TPU locators) | Both | Combined project with all 5 parts |
+| **Standard** | 915 diamond | Door with camera opening, hinge knuckles, latch |
+| **MagSafe** | 454 diamond | Standard door + ø58mm MagSafe cooler opening with a solid ring border |
+
+Each variant ships as a door STL and a combined 3MF (door + 4 TPU locators). The four
+TPU corner locators are shared between variants (one set of STLs).
+
+## Vent Pattern
+
+Diamond (square rotated 45°) holes instead of circles. For these vertical through-holes
+printed outer-face-down, diamonds give straight toolpaths (faster, less stringing across
+~900 holes) and uniform wall thickness between holes — circles pinch to a thin web where
+they're closest. Each diamond is 2mm point-to-point with ~1.5mm walls between.
 
 ## Printing
 
@@ -31,21 +40,27 @@ From [Apple's dimensional drawing](https://developer.apple.com/accessories/) (20
 | Corner radius | R12.00 (R11.0 used for locator fit) |
 | Camera plateau | 58.01 × 38.5 mm, R12.00 corners (wide horizontal bar) |
 | Camera clearance | 1.5 mm |
-| MagSafe ring | ø57.50 mm |
+| MagSafe ring | ø57.50 mm, centre 77.74 mm from top edge |
+
+MagSafe variant: ø58mm through-opening (ring + 0.5mm clearance) centred on the magnet ring,
+with a ~4mm solid unvented border.
 
 > The iPhone 18 Pro uses the wide horizontal camera plateau (introduced on the 17 Pro), spanning ~81% of the back width — not the square corner camera of the 15/16 Pro.
 
 ## Files
 
 ```
-stl/           Door STL + 4 TPU locator STLs
-3mf/           Combined 3MF (door + locators)
+stl/           Door STLs (standard + MagSafe) + 4 shared TPU locator STLs
+3mf/           Combined 3MFs (door + locators), one per variant
 blender/       Blender project (reference only)
 ```
 
 ## Generation
 
-The door was generated programmatically using the CardboardXR door generator's `buildDoor()` with Manifold WASM for CSG operations — the same engine used by the [browser tool](https://brenpoly.github.io/CardboardXR/door-generator/).
+Generated programmatically from the CardboardXR door generator's `buildDoor()` with Manifold
+WASM for CSG — the same engine as the [browser tool](https://brenpoly.github.io/CardboardXR/door-generator/).
+The vent cutter was swapped from circle to diamond and a MagSafe opening + solid-border vent
+keepout were added; all mating interfaces (outline, hinge, latch, locator pockets) are unchanged.
 
 ## License
 
