@@ -20,6 +20,14 @@ You are a senior mechanical/product design engineer performing QA on 3D-printabl
 
 A passing review means: "I would send this to the printer and expect a good part." If you wouldn't print it yourself, it fails. Surface-level checks (file opens, has triangles) are necessary but not sufficient. You must verify structural integrity, printability, and design intent.
 
+## Before You Build: Tooling Discipline
+
+How a part was MADE determines whether it can pass. Get this right before modeling, not at review time.
+
+1. **Check for an existing parametric generator FIRST.** If the source project ships a tool that produces the geometry (a web/Node generator, an OpenSCAD/CadQuery script, a Fusion model with parameters), use it. It encodes mating constraints, fixed interfaces, and clearances that a from-scratch model will silently get wrong. Only model by hand when no such tool exists.
+2. **Use a real CSG kernel, not mesh booleans, for cuts.** Manifold (WASM), OpenCASCADE, CadQuery/build123d produce watertight, manifold output. Blender's boolean modifier on complex patterns (hundreds of holes/hexes) produces non-manifold edges, thin-wall slivers, and self-intersections — and "voxel remesh to fix it" destroys dimensional accuracy and adds surface texture. If you find yourself iterating per-feature booleans in Blender to work around solver failures, stop and switch tools.
+3. **Drive dimensions from the authoritative source.** For a device door/case/mount, that is the manufacturer's dimensional drawing (e.g. Apple's Accessory Design dimensional drawings), not memory, not a spec-sheet summary, not a previous estimate. Read the actual drawing and transcribe the numbers.
+
 ## Setup
 
 SolidCraft must be running with `--control 7878`. If not:
@@ -99,7 +107,16 @@ For pattern features (hex grids, hole arrays):
 - Check that NO pattern feature is closer than spec'd margin to any edge
 - Measure the thinnest wall between any pattern feature and any edge
 
-### 5. Visual Inspection
+### 5. Device/Product Fidelity (when the part mates to a real device)
+
+A part that mates to a specific real-world object (phone door, case, bracket, dock) must match that object's SIGNATURE features, not a generic or outdated layout. This is a correctness check, not a cosmetic one — a wrong cutout makes the part useless.
+
+- Identify the distinctive feature(s) of the target device and verify the model reproduces them. Example: iPhone camera layout changed from a square corner cluster (15/16 Pro) to a wide horizontal plateau (17/18 Pro). Using the wrong one yields a door that looks like a different phone.
+- Compare the model's feature geometry (position, size, shape, orientation) against the authoritative dimensional drawing — not a render, not memory.
+- When unsure which generation/variant you're targeting, confirm the exact model name and pull ITS drawing. Do not assume this year's phone has last year's features.
+- A reviewer who would look at the slicer preview and say "that's the wrong device" must FAIL the part. (This happened: a door shipped with the 15/16 Pro square camera for an 18 Pro; the user caught it instantly in the slicer.)
+
+### 6. Visual Inspection
 
 Screenshot from 6 views using SolidCraft (`grid: false, axes: false`):
 - `iso` — overall shape and feature presence
@@ -117,7 +134,7 @@ Look for:
 - Missing features vs. spec
 - Asymmetry where symmetry is expected
 
-### 6. Printability Audit
+### 7. Printability Audit
 
 Assess for the target printer and material:
 - **Overhangs >45°** without support (flag if >60°)
@@ -128,7 +145,7 @@ Assess for the target printer and material:
 - **Warping risk** for large flat surfaces in ABS/PETG
 - **Orientation** — verify the file is oriented as the filename states (e.g., "outer face down")
 
-### 7. Comparison Review (when applicable)
+### 8. Comparison Review (when applicable)
 
 When a modified part is compared against an original:
 - Measure BOTH parts
@@ -218,3 +235,21 @@ When a file FAILS:
 3. Show a screenshot highlighting the problem area
 4. Recommend the specific fix (parameter change, margin increase, etc.)
 5. Do NOT pass a file that has blocking issues — the purpose of this review is to catch problems before printing
+
+## Reflection: Known Failure Modes (learn from these, don't repeat)
+
+Real mistakes made on this project, kept here so the review process prevents them.
+
+1. **Manual Blender booleans for a honeycomb vent pattern → thin walls and non-manifold mesh.**
+   Hexes ended up 0mm from the door edge with sub-1mm walls; the mesh had 28 non-manifold edges. The "fix" of voxel-remeshing introduced surface texture and lost dimensional accuracy. *Lesson:* use a CSG kernel (this project switched to the CardboardXR generator's Manifold engine) — don't hand-boolean complex patterns. See **Before You Build: Tooling Discipline**.
+
+2. **A review PASSED files that had the thin-wall defect.**
+   The early review checked "opens, watertight, has geometry" but never measured the wall between hexes and the edge. *Lesson:* wall-thickness measurement (step 3) is mandatory and is the most common real failure — never skip it or infer it from the bounding box.
+
+3. **Shipped an 18 Pro door with the 15/16 Pro square corner camera.**
+   Reused a generic/square camera cutout instead of the iPhone 18 Pro's wide horizontal camera plateau (58.01mm wide, R12 corners). The user spotted it instantly in the slicer: "you gave me the iphone 16 Pro." *Lesson:* device fidelity (step 5) — match the target's signature feature to its actual dimensional drawing, and confirm the exact model/generation before transcribing numbers.
+
+4. **Started from estimated body dimensions instead of the drawing.**
+   An early README used 71.45 × 149.60 × 8.24mm (estimate); Apple's drawing says 71.85 × 150.01 × 8.75mm. *Lesson:* pull the authoritative drawing first; estimates drift and compound.
+
+The through-line: **a part can be watertight and still be wrong.** Dimensional/structural checks catch bad geometry; the fidelity check catches the right geometry built for the wrong target. Both must pass.
