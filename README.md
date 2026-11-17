@@ -1,16 +1,16 @@
 # VR Viewer Door - iPhone 18 Pro
 
-Remix of the [Mobile VR Viewer for Modern Smartphones](https://makerworld.com/en/models/1192481) by [@arturmentado](https://makerworld.com/en/@arturmentado), adding an iPhone 18 Pro door with honeycomb ventilation.
+Remix of the [Mobile VR Viewer for Modern Smartphones](https://makerworld.com/en/models/1192481) by [@arturmentado](https://makerworld.com/en/@arturmentado), adding an iPhone 18 Pro door.
 
-## Door Variants
+Generated with the [CardboardXR door generator](https://brenpoly.github.io/CardboardXR/door-generator/) using Manifold CSG — proper boolean geometry, watertight mesh, no manual modeling artifacts.
 
-| Variant | Description |
-|---|---|
-| **Solid** | Standard door with original vent style |
-| **Honeycomb vents** | Honeycomb hex pattern for improved airflow |
-| **MagSafe + Honeycomb** | Honeycomb vents with a 58mm MagSafe cooler opening and solid ring border |
+## What's Included
 
-All doors include 4 TPU locator pads (printed separately).
+| File | Material | Description |
+|---|---|---|
+| Door (PETG, outer face down) | PETG | Door with 1,011 circular vent holes, camera opening, hinge knuckles, latch |
+| TPU locator × 4 | TPU | Corner grip pads with dovetail pockets |
+| 3MF (PETG + TPU locators) | Both | Combined project with all 5 parts |
 
 ## Printing
 
@@ -19,31 +19,31 @@ All doors include 4 TPU locator pads (printed separately).
 - **Nozzle:** 0.4mm
 - **Layer height:** 0.20mm
 
-The `3mf/` folder has pre-configured Bambu Studio project files with H2D print settings.
+## iPhone 18 Pro Dimensions
 
-## Honeycomb Specs
+From [Apple's dimensional drawing](https://developer.apple.com/accessories/) (2026-09-09):
 
-- Hex size: 4mm flat-to-flat
-- Wall thickness: 1.5mm between hexes
-- Frame margin: 8mm minimum from door edge (5.7mm solid wall after hex radius)
-- MagSafe ring: 7mm solid border around 58mm opening
-- Mesh: fully watertight (0 non-manifold edges)
+| Parameter | Value |
+|---|---|
+| Width | 71.85 mm |
+| Length | 150.01 mm |
+| Thickness (body) | 8.75 mm |
+| Corner radius | R12.00 (R11.0 used for locator fit) |
+| Camera plateau | 41.0 × 43.0 mm, R11.85 corners |
+| Camera clearance | 1.5 mm |
+| MagSafe ring | ø57.50 mm |
 
 ## Files
 
 ```
-stl/           STL files for all door variants + TPU locators
-3mf/           Bambu Studio 3MF projects (H2D 0.4mm nozzle, PETG)
-blender/       Blender project with all door objects
+stl/           Door STL + 4 TPU locator STLs
+3mf/           Combined 3MF (door + locators)
+blender/       Blender project (reference only)
 ```
 
-## iPhone 18 Pro Dimensions
+## Generation
 
-Based on Apple's dimensional drawing (September 2025):
-- Width: 71.45mm
-- Height: 149.60mm
-- Depth: 8.24mm
-- Camera module: 40.28mm x 37.72mm
+The door was generated programmatically using the CardboardXR door generator's `buildDoor()` with Manifold WASM for CSG operations — the same engine used by the [browser tool](https://brenpoly.github.io/CardboardXR/door-generator/).
 
 ## License
 
