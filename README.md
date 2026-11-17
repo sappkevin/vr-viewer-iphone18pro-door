@@ -24,9 +24,10 @@ The `3mf/` folder has pre-configured Bambu Studio project files with H2D print s
 ## Honeycomb Specs
 
 - Hex size: 4mm flat-to-flat
-- Wall thickness: 1.2mm between hexes
-- Frame margin: 5mm minimum from door edge
-- MagSafe ring: 5mm solid border around 58mm opening
+- Wall thickness: 1.5mm between hexes
+- Frame margin: 8mm minimum from door edge (5.7mm solid wall after hex radius)
+- MagSafe ring: 7mm solid border around 58mm opening
+- Mesh: fully watertight (0 non-manifold edges)
 
 ## Files
 
