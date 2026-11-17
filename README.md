@@ -29,9 +29,11 @@ From [Apple's dimensional drawing](https://developer.apple.com/accessories/) (20
 | Length | 150.01 mm |
 | Thickness (body) | 8.75 mm |
 | Corner radius | R12.00 (R11.0 used for locator fit) |
-| Camera plateau | 41.0 × 43.0 mm, R11.85 corners |
+| Camera plateau | 58.01 × 38.5 mm, R12.00 corners (wide horizontal bar) |
 | Camera clearance | 1.5 mm |
 | MagSafe ring | ø57.50 mm |
+
+> The iPhone 18 Pro uses the wide horizontal camera plateau (introduced on the 17 Pro), spanning ~81% of the back width — not the square corner camera of the 15/16 Pro.
 
 ## Files
 
