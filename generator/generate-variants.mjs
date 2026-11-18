@@ -19,11 +19,20 @@ const { buildDoor, check } = await import(DOOR_MOD);
 const { toSTL } = await import(join(DOOR_GEN, 'stl.js'));
 const { zipSync, strToU8 } = await import(join(DOOR_GEN, 'vendor/fflate.js'));
 
-// iPhone 18 Pro — from Apple's dimensional drawing (2026-09-09)
+// iPhone 18 Pro — from Apple's dimensional drawing (2026-09-09) + caliper measurement
 const base18 = {
   length: 150.01, width: 71.85, thickness: 8.75, cornerRadius: 11.0,
-  camera: { top: 3.0, left: 6.92, width: 58.01, height: 38.5, radius: 12.0 },
-  cameraClearance: 1.5,
+  // Camera plateau measured on the actual phone (calipers): 59.0 x 34.6 mm at the BASE
+  // (widest point, flush to the body). The window is sized to this base so the curved/
+  // tapered camera bump drops straight in. Centered: left = (71.85 - 59.0) / 2 = 6.425.
+  camera: { top: 3.0, left: 6.425, width: 59.0, height: 34.6, radius: 12.0 },
+  // Window opening fixed at 60.0 x 35.5 mm (user spec): plateau 59.0 x 34.6 + per-axis
+  // clearance 0.5 mm/side width, 0.45 mm/side height. Snug — ~0.5 mm all round.
+  cameraClearance: { x: 0.5, y: 0.45 },
+  // Raised housing on the outer face so the camera stack clears and the phone seats flush.
+  // Protrusion 4.89 mm (Apple drawing: 2.78 back->plateau + 2.11 plateau->lens glass);
+  // height 4.0 -> ~5.9 mm cavity from the phone back (~1 mm over the lens tips).
+  cameraBump: { height: 4.0, wall: 2.0 },
 };
 
 // MagSafe ring: ø57.50mm, centre 77.74mm from the top edge (drawing page 4).
@@ -86,8 +95,8 @@ for (const variant of VARIANTS) {
   const ok = doorPieces === 1 && locPieces.every(n => n === 1);
   console.log(`[${variant.name}] ${r.holes} vents | door ${r.door.volume().toFixed(0)} mm³ | pieces ${doorPieces} | locators [${locPieces}] | ${ok ? 'OK' : 'MULTI-PIECE!'}`);
 
-  // Door STL
-  writeFileSync(join(STL_OUT, `${variant.file} (PETG, outer face down).stl`), toSTL(r.door));
+  // Door STL (prints camera-side up — hinge/latch need supports)
+  writeFileSync(join(STL_OUT, `${variant.file} (PETG, camera side up).stl`), toSTL(r.door));
 
   // Locator STLs (shared geometry, but write per-variant names only for the standard door to avoid dupes)
   if (variant.name === 'iPhone 18 Pro') {

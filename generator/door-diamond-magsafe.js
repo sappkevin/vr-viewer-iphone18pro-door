@@ -53,12 +53,15 @@ export function locatorWall(d) {
 export function derive(spec) {
   const F = FIXED;
   const W = spec.width / 2, L = spec.length / 2, R = spec.cornerRadius;
-  const cl = spec.cameraClearance ?? 1.5;
+  // cameraClearance is a number (uniform) or { x, y } for per-axis clearance.
+  const clv = spec.cameraClearance ?? 1.5;
+  const clx = (clv && typeof clv === 'object') ? clv.x : clv;
+  const cly = (clv && typeof clv === 'object') ? clv.y : clv;
   const c = spec.camera;
   // camera plateau in door coords (back view: left edge = +x, top edge = +y)
-  let x1 = W - c.left + cl, x0 = W - c.left - c.width - cl;
-  let y1 = L - c.top + cl, y0 = L - c.top - c.height - cl;
-  let r = Math.min((c.radius ?? 0) + cl, (x1 - x0) / 2 - 0.001, (y1 - y0) / 2 - 0.001);
+  let x1 = W - c.left + clx, x0 = W - c.left - c.width - clx;
+  let y1 = L - c.top + cly, y0 = L - c.top - c.height - cly;
+  let r = Math.min((c.radius ?? 0) + Math.min(clx, cly), (x1 - x0) / 2 - 0.001, (y1 - y0) / 2 - 0.001);
   return { W, L, R, padTop: F.screenZ - spec.thickness, window: [x0, x1, y0, y1, r] };
 }
 
@@ -69,7 +72,9 @@ export function check(spec) {
   const c = spec.camera || {};
   for (const k of ['top', 'left', 'width', 'height']) if (!n(c[k])) errors.push(`Missing camera ${k}.`);
   if (c.radius != null && !n(c.radius)) errors.push('Missing camera radius.');
-  if (spec.cameraClearance != null && !n(spec.cameraClearance)) errors.push('Missing camera clearance.');
+  const clv = spec.cameraClearance;
+  const clOk = clv == null || n(clv) || (typeof clv === 'object' && n(clv.x) && n(clv.y));
+  if (!clOk) errors.push('Missing camera clearance.');
   if (errors.length) return { errors, warnings };
   if (spec.thickness > LIMITS.maxThickness) errors.push(`Too thick: ${spec.thickness} mm (max ${LIMITS.maxThickness} mm, measured without the camera bump).`);
   if (spec.thickness < LIMITS.minThickness) errors.push(`Too thin: ${spec.thickness} mm (min ${LIMITS.minThickness} mm).`);
@@ -93,7 +98,8 @@ export function check(spec) {
   }
   if (c.width <= 0 || c.height <= 0) errors.push('The camera area needs a width and a height of more than 0 mm.');
   if ((c.radius ?? 0) < 0) errors.push("The camera area's corner radius can't be negative. Use 0 for square corners.");
-  if ((spec.cameraClearance ?? 1.5) < 0) errors.push("The clearance around the camera can't be negative.");
+  const clMin = (() => { const v = spec.cameraClearance ?? 1.5; return (v && typeof v === 'object') ? Math.min(v.x, v.y) : v; })();
+  if (clMin < 0) errors.push("The clearance around the camera can't be negative.");
   const [x0, x1, y0, y1] = d.window;
   if (c.left + c.width > spec.width + 0.01 || c.top + c.height > spec.length + 0.01 || c.left < 0 || c.top < 0)
     errors.push('The camera area extends past the phone outline. Check the camera numbers.');
@@ -280,9 +286,19 @@ export function buildDoor(M, spec) {
     const cl = F.recessClear;
     door = door.subtract(prism(M, rrect(M, -d.W - cl, d.W + cl, -d.L - cl, d.L + cl, d.R + cl), padTop, zt + 0.01));
   }
-  // 6 camera window through the door and locators (up to the pad top)
+  // 6 camera window + raised housing (bump-out) through the door and locators.
+  // The iPhone 18 Pro camera plateau protrudes ~4.89 mm; a flat 2 mm door can't clear
+  // it, so a raised rounded-rect housing on the outer face gives the camera a chamber to
+  // seat into. The window is sized to the plateau BASE (its widest point, flush with the
+  // phone body) so the curved/tapered bump drops straight in.
   const [wx0, wx1, wy0, wy1, wr] = d.window;
-  const win = prism(M, rrect(M, wx0, wx1, wy0, wy1, wr), z0 - 1, padTop);
+  const cb = spec.cameraBump;               // { height, wall } or undefined
+  const bumpBot = cb ? z0 - cb.height : z0; // outer rim of the housing (−z = further out)
+  if (cb) {
+    const outer = rrect(M, wx0 - cb.wall, wx1 + cb.wall, wy0 - cb.wall, wy1 + cb.wall, wr + cb.wall);
+    door = door.add(prism(M, outer, bumpBot, z0 + 1e-3));
+  }
+  const win = prism(M, rrect(M, wx0, wx1, wy0, wy1, wr), bumpBot - 1, padTop);
   door = door.subtract(win);
   for (const l of locs) l.mesh = l.mesh.subtract(win);
   // 7 vent holes — DIAMOND cutter (square rotated 45°) instead of circle: straight
@@ -301,8 +317,19 @@ export function buildDoor(M, spec) {
     const mcut = prism(M, M.CrossSection.circle(ms.openR, 96).translate([ms.x, ms.y]), z0 - 1, Math.max(padTop, zt) + 0.5);
     door = door.subtract(mcut);
   }
-  // to print orientation: outer face on the bed (z = 0)
-  door = door.translate([0, 0, -z0]);
-  for (const l of locs) l.mesh = l.mesh.translate([0, 0, -z0]);
+  // print orientation. With a camera housing on the outer face, the door must print
+  // camera-side UP (outer face up); the hinge knuckles and latch then face the bed and
+  // need supports. Flip 180° about X and drop the tallest inner feature (hinge) to z = 0.
+  // Without a housing, keep the original outer-face-down orientation.
+  if (spec.cameraBump) {
+    door = door.rotate([180, 0, 0]);
+    for (const l of locs) l.mesh = l.mesh.rotate([180, 0, 0]);
+    const dz = F.hingeZ + F.knuckleR;       // door's tallest feature (hinge knuckle top)
+    door = door.translate([0, 0, dz]);
+    for (const l of locs) l.mesh = l.mesh.translate([0, 0, dz]);
+  } else {
+    door = door.translate([0, 0, -z0]);
+    for (const l of locs) l.mesh = l.mesh.translate([0, 0, -z0]);
+  }
   return { door, locators: locs, holes: holes.length, derived: d };
 }
