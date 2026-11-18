@@ -26,9 +26,8 @@ const base18 = {
   // (widest point, flush to the body). The window is sized to this base so the curved/
   // tapered camera bump drops straight in. Centered: left = (71.85 - 59.0) / 2 = 6.425.
   camera: { top: 3.0, left: 6.425, width: 59.0, height: 34.6, radius: 12.0 },
-  // Window opening fixed at 60.0 x 35.5 mm (user spec): plateau 59.0 x 34.6 + per-axis
-  // clearance 0.5 mm/side width, 0.45 mm/side height. Snug — ~0.5 mm all round.
-  cameraClearance: { x: 0.5, y: 0.45 },
+  // Window = plateau 59.0 x 34.6 + 1.5 mm clearance all round -> 62.0 x 37.6 mm opening.
+  cameraClearance: 1.5,
   // Raised housing on the outer face so the camera stack clears and the phone seats flush.
   // Protrusion 4.89 mm (Apple drawing: 2.78 back->plateau + 2.11 plateau->lens glass);
   // height 4.0 -> ~5.9 mm cavity from the phone back (~1 mm over the lens tips).

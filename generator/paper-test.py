@@ -17,9 +17,9 @@ top    = 20.0                  # phone top edge, y from page top
 
 PHONE  = dict(w=71.85, h=150.01, r=12.0, t=0.0)  # real phone back (align to this)
 PLATE  = dict(w=59.0,  h=34.6,   r=12.0, t=3.0)  # camera plateau (measured base) — must fit inside
-CLX, CLY = 0.5, 0.45                             # window clearance per side (x, y)
+CLX, CLY = 1.5, 1.5                              # window clearance per side (x, y)
 WALL   = 2.0                                     # housing outer-wall thickness
-# window (CUT line) = plateau + per-axis clearance -> 60.0 x 35.5 mm opening
+# window (CUT line) = plateau + clearance -> 62.0 x 37.6 mm opening
 WINDOW = dict(w=PLATE["w"]+2*CLX, h=PLATE["h"]+2*CLY, r=PLATE["r"]+min(CLX,CLY), t=PLATE["t"]-CLY)
 HOUSE  = dict(w=WINDOW["w"]+2*WALL, h=WINDOW["h"]+2*WALL, r=WINDOW["r"]+WALL, t=WINDOW["t"]-WALL)
 MAG    = dict(d=57.5,  t=77.74)                  # MagSafe ring (MagSafe variant)
@@ -110,7 +110,7 @@ steps = [
     "How to test:",
     "1.  Print at 100% / Actual Size. Confirm the rulers read 100 mm and 50 mm — if not, fix scale and reprint.",
     "2.  Lay this sheet on the BACK of the phone; line the phone outline up with the real edges and top.",
-    "3.  The camera plateau should sit inside the bold CUT window with a ~0.5 mm gap all around.",
+    "3.  The camera plateau should sit inside the bold CUT window with a ~1.5 mm gap all around.",
     "4.  Optional: cut out the bold window and check the plateau pokes through cleanly.",
 ]
 for i, s in enumerate(steps):

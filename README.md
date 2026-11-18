@@ -37,8 +37,8 @@ phone proud so the latch won't lock. So the door has a **raised rounded-rect hou
 its outer face around the camera window: 4 mm tall with 2 mm walls, giving a ~5.9 mm cavity
 from the phone's back so the camera stack clears with ~1 mm over the lens tips.
 
-The window opening is **60.0 × 35.5 mm** — the plateau's caliper-measured base footprint
-(**59.0 × 34.6 mm**, the widest point flush to the body) plus ~0.5 mm clearance all round.
+The window opening is **62.0 × 37.6 mm** — the plateau's caliper-measured base footprint
+(**59.0 × 34.6 mm**, the widest point flush to the body) plus 1.5 mm clearance all round.
 Sizing to the *base* matters because the bump flares outward toward its base, so an opening
 matched to the narrower top would catch the curved sides. A 1:1 paper test template for this
 opening is in `templates/` (see `templates/PAPER-TEST.md`).
@@ -65,7 +65,7 @@ From [Apple's dimensional drawing](https://developer.apple.com/accessories/) (20
 | Corner radius | R12.00 (R11.0 used for locator fit) |
 | Camera plateau (base) | 59.0 × 34.6 mm, R12.00 corners — caliper-measured (wide horizontal bar) |
 | Camera protrusion | 4.89 mm (2.78 back→plateau + 2.11 plateau→lens glass) |
-| Camera window opening | 60.0 × 35.5 mm (≈0.5 mm clearance all round) |
+| Camera window opening | 62.0 × 37.6 mm (1.5 mm clearance all round) |
 | MagSafe ring | ø57.50 mm, centre 77.74 mm from top edge |
 
 MagSafe variant: ø58mm through-opening (ring + 0.5mm clearance) centred on the magnet ring,
