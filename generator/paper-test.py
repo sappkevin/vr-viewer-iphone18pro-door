@@ -17,11 +17,9 @@ top    = 20.0                  # phone top edge, y from page top
 
 PHONE  = dict(w=71.85, h=150.01, r=12.0, t=0.0)  # real phone back (align to this)
 PLATE  = dict(w=59.0,  h=34.6,   r=12.0, t=3.0)  # camera plateau (measured base) — must fit inside
-CLX, CLY = 1.5, 1.5                              # window clearance per side (x, y)
-WALL   = 2.0                                     # housing outer-wall thickness
-# window (CUT line) = plateau + clearance -> 62.0 x 37.6 mm opening
+CLX, CLY = 2.5, 1.5                              # window clearance per side (x widened +1 for shrinkage)
+# window (CUT line) = plateau + clearance -> 64.0 x 37.6 mm opening
 WINDOW = dict(w=PLATE["w"]+2*CLX, h=PLATE["h"]+2*CLY, r=PLATE["r"]+min(CLX,CLY), t=PLATE["t"]-CLY)
-HOUSE  = dict(w=WINDOW["w"]+2*WALL, h=WINDOW["h"]+2*WALL, r=WINDOW["r"]+WALL, t=WINDOW["t"]-WALL)
 MAG    = dict(d=57.5,  t=77.74)                  # MagSafe ring (MagSafe variant)
 
 def rrect(d, **style):
@@ -47,7 +45,6 @@ el.append(text(12, 16, "Print on US Letter at 100% / Actual Size (not &#8216;fit
 
 # reference shapes
 el.append(rrect(PHONE,  stroke="#000", stroke_width=0.3))                                   # phone outline
-el.append(rrect(HOUSE,  stroke="#000", stroke_width=0.25, stroke_dasharray="0.6,1.0"))      # housing wall
 el.append(rrect(PLATE,  stroke="#000", stroke_width=0.4,  stroke_dasharray="2.2,1.3"))      # plateau (dashed)
 el.append(rrect(WINDOW, stroke="#000", stroke_width=1.0))                                    # CUT window (bold)
 
@@ -85,7 +82,7 @@ rx = cx + PHONE["w"]/2 + 3
 el.append(text(rx, top + 8,  "— CUT this window (bold line)", 3.0, weight="bold"))
 el.append(text(rx, top + 13, "— Plateau (dashed): must sit inside", 2.9))
 el.append(text(rx, top + 18, "   the window with a gap all round", 2.9))
-el.append(text(rx, top + 23, "— Dotted: 4 mm-tall housing wall", 2.7))
+el.append(text(rx, top + 23, "— Flat through-window (no housing)", 2.7))
 el.append(text(cx + PHONE["w"]/2 + 3, mcy, "— MagSafe ring ø57.5 (MagSafe variant)", 2.7))
 
 # --- calibration rulers ---
@@ -110,7 +107,7 @@ steps = [
     "How to test:",
     "1.  Print at 100% / Actual Size. Confirm the rulers read 100 mm and 50 mm — if not, fix scale and reprint.",
     "2.  Lay this sheet on the BACK of the phone; line the phone outline up with the real edges and top.",
-    "3.  The camera plateau should sit inside the bold CUT window with a ~1.5 mm gap all around.",
+    "3.  The camera plateau should sit inside the bold CUT window with a gap all around (~2.5 mm sides, ~1.5 mm top/bottom).",
     "4.  Optional: cut out the bold window and check the plateau pokes through cleanly.",
 ]
 for i, s in enumerate(steps):

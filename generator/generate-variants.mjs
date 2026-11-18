@@ -24,14 +24,14 @@ const base18 = {
   length: 150.01, width: 71.85, thickness: 8.75, cornerRadius: 11.0,
   // Camera plateau measured on the actual phone (calipers): 59.0 x 34.6 mm at the BASE
   // (widest point, flush to the body). The window is sized to this base so the curved/
-  // tapered camera bump drops straight in. Centered: left = (71.85 - 59.0) / 2 = 6.425.
+  // tapered camera plateau drops straight through. Centered: left = (71.85 - 59.0) / 2 = 6.425.
   camera: { top: 3.0, left: 6.425, width: 59.0, height: 34.6, radius: 12.0 },
-  // Window = plateau 59.0 x 34.6 + 1.5 mm clearance all round -> 62.0 x 37.6 mm opening.
-  cameraClearance: 1.5,
-  // Raised housing on the outer face so the camera stack clears and the phone seats flush.
-  // Protrusion 4.89 mm (Apple drawing: 2.78 back->plateau + 2.11 plateau->lens glass);
-  // height 4.0 -> ~5.9 mm cavity from the phone back (~1 mm over the lens tips).
-  cameraBump: { height: 4.0, wall: 2.0 },
+  // Flat through-window, NO raised housing: the 4.89 mm plateau pokes through the 2 mm plate
+  // and ~2.9 mm out the back, and the phone body seats flat on the inner face. This lets the
+  // door print flat, outer-face-down, with NO supports (teardrop hinge bore self-supports).
+  // Clearance per side: x widened to 2.5 (window 64.0 wide) to compensate for ~2 mm of
+  // measured print undersize on the first print; y stays 1.5 -> window 64.0 x 37.6 mm.
+  cameraClearance: { x: 2.5, y: 1.5 },
 };
 
 // MagSafe ring: ø57.50mm, centre 77.74mm from the top edge (drawing page 4).
@@ -94,8 +94,8 @@ for (const variant of VARIANTS) {
   const ok = doorPieces === 1 && locPieces.every(n => n === 1);
   console.log(`[${variant.name}] ${r.holes} vents | door ${r.door.volume().toFixed(0)} mm³ | pieces ${doorPieces} | locators [${locPieces}] | ${ok ? 'OK' : 'MULTI-PIECE!'}`);
 
-  // Door STL (prints camera-side up — hinge/latch need supports)
-  writeFileSync(join(STL_OUT, `${variant.file} (PETG, camera side up).stl`), toSTL(r.door));
+  // Door STL (prints flat, outer-face-down — no supports)
+  writeFileSync(join(STL_OUT, `${variant.file} (PETG, no supports).stl`), toSTL(r.door));
 
   // Locator STLs (shared geometry, but write per-variant names only for the standard door to avoid dupes)
   if (variant.name === 'iPhone 18 Pro') {
