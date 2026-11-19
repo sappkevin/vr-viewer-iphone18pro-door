@@ -59,8 +59,13 @@ export function derive(spec) {
   const cly = (clv && typeof clv === 'object') ? clv.y : clv;
   const c = spec.camera;
   // camera plateau in door coords (back view: left edge = +x, top edge = +y)
+  // `camera.drop` shifts the window toward the phone centre (−y) WITHOUT resizing it. The
+  // camera-end TPU corner locators wrap the phone's top corners; a window sized tall enough
+  // to clear the plateau reaches up into them. Dropping the (over-tall) window into the empty
+  // phone area below the camera keeps the full tested opening while leaving those locators whole.
+  const drop = c.drop ?? 0;
   let x1 = W - c.left + clx, x0 = W - c.left - c.width - clx;
-  let y1 = L - c.top + cly, y0 = L - c.top - c.height - cly;
+  let y1 = L - c.top + cly - drop, y0 = L - c.top - c.height - cly - drop;
   let r = Math.min((c.radius ?? 0) + Math.min(clx, cly), (x1 - x0) / 2 - 0.001, (y1 - y0) / 2 - 0.001);
   return { W, L, R, padTop: F.screenZ - spec.thickness, window: [x0, x1, y0, y1, r] };
 }

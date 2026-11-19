@@ -8,8 +8,8 @@ Generated with the [CardboardXR door generator](https://brenpoly.github.io/Cardb
 
 | Variant | Vents | Description |
 |---|---|---|
-| **Standard** | 342 diamond | Door with flat camera through-window, hinge knuckles, latch |
-| **MagSafe** | 150 diamond | Standard door + ø58mm MagSafe cooler opening with a solid ring border |
+| **Standard** | 330 diamond | Door with flat camera through-window, hinge knuckles, latch |
+| **MagSafe** | 142 diamond | Standard door + ø58mm MagSafe cooler opening with a solid ring border |
 
 Each variant ships as a door STL and a combined 3MF (door + 4 TPU locators). The four
 TPU corner locators are shared between variants (one set of STLs).
@@ -37,17 +37,33 @@ supports), the window is a **flat through-opening**: the plateau pokes straight 
 2 mm plate and sticks out ~2.9 mm past the back, while the phone's flat body seats on the
 inner face. This keeps the door printable **flat, outer-face-down, with no supports**.
 
-The window opening is **64.0 × 37.6 mm** — the plateau's caliper-measured base footprint
-(**59.0 × 34.6 mm**, the widest point flush to the body) plus clearance of **2.5 mm per side
-in width** and 1.5 mm top/bottom. The extra width beyond the nominal 1.5 mm compensates for
-~2 mm of measured print undersize (shrinkage / perimeter inset) on the first print — the
-printed opening came out too narrow to clear the plateau. Sizing to the *base* matters
-because the plateau flares outward toward its base, so an opening matched to the narrower top
-would catch the curved sides. A 1:1 paper test template for this opening is in `templates/`
-(see `templates/PAPER-TEST.md`).
+The window opening is **64.0 × 40.1 mm with r8 corners** — the plateau's caliper-measured
+base footprint (**59.0 × 34.6 mm**, the widest point flush to the body) plus clearance of
+**2.5 mm per side in width** and **2.75 mm top/bottom**. Sizing to the *base* matters because
+the plateau flares outward toward its base, so an opening matched to the narrower top would
+catch the curved sides.
 
-> Only the camera opening was widened; the door body width is unchanged for now. The overall
-> headset width still needs a matching adjustment (follow-up).
+The **corner radius (r8) is the critical fit parameter** and cost several failed prints: an
+opening matched to Apple's R12 drawing (which gave an r13.5 window) curves inward so early
+that near the corners the window is actually *narrower* than the plateau, and the plateau's
+squarer ~r7 corners catch — looking like the window is "too short"/too oval when the real
+problem is the corner. r8 (the value open-source case makers like OpenCase use for the camera
+opening) clears it. This was confirmed with a bracketed A/B/C tile fit test (`calibration/`):
+variant A (64.0 × 40.1, r8) seated the plateau cleanly. A 1:1 paper test template for this
+opening is in `templates/` (see `templates/PAPER-TEST.md`).
+
+**Window vertical position:** the plateau top sits ~3 mm below the phone's top edge, and the
+window is nudged **down 3.0 mm** from centred (`camera.drop: 3.0`, which also allows for print
+shrinkage) to close a small gap seen above the camera on the test fit. In the ideal model this
+puts the window's top edge ~0.25 mm *inside* the plateau's top edge, but PETG shrinkage absorbs
+that on the actual print (the printed window lands slightly higher/smaller than the model). The
+window top lands 3.25 mm from the phone's top edge, bottom clearance ~5.75 mm. Confirm it on the
+1:1 paper template before reprinting. (The MagSafe variant's ring border stays clear — the window
+bottom is ~5.4 mm above the ø58 opening.) If a fresh print catches at the plateau's top edge, back
+`camera.drop` off toward 2.5.
+
+> Only the camera opening was changed (widened and nudged down 3.0 mm); the door body width is
+> unchanged for now. The overall headset width still needs a matching adjustment (follow-up).
 
 ## Printing
 
@@ -70,7 +86,7 @@ From [Apple's dimensional drawing](https://developer.apple.com/accessories/) (20
 | Corner radius | R12.00 (R11.0 used for locator fit) |
 | Camera plateau (base) | 59.0 × 34.6 mm, R12.00 corners — caliper-measured (wide horizontal bar) |
 | Camera protrusion | 4.89 mm (2.78 back→plateau + 2.11 plateau→lens glass) |
-| Camera window opening | 64.0 × 37.6 mm (2.5 mm clearance sides / 1.5 mm top-bottom) |
+| Camera window opening | 64.0 × 40.1 mm, r8 corners (2.5 mm clearance sides / 2.75 mm top-bottom) |
 | MagSafe ring | ø57.50 mm, centre 77.74 mm from top edge |
 
 MagSafe variant: ø58mm through-opening (ring + 0.5mm clearance) centred on the magnet ring,

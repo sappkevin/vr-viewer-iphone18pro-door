@@ -25,13 +25,27 @@ const base18 = {
   // Camera plateau measured on the actual phone (calipers): 59.0 x 34.6 mm at the BASE
   // (widest point, flush to the body). The window is sized to this base so the curved/
   // tapered camera plateau drops straight through. Centered: left = (71.85 - 59.0) / 2 = 6.425.
-  camera: { top: 3.0, left: 6.425, width: 59.0, height: 34.6, radius: 12.0 },
+  // radius 5.5 -> window corner r8 (5.5 + min clearance 2.5). The too-round r13.5 (was
+  // radius 12 + 1.5) pinched the opening so near the corners it was NARROWER than the
+  // plateau's squarer ~r7 corners, which caught. r8 (open-source case-maker value) clears
+  // it. Confirmed by the A/B/C height tile print: variant A (64.0 x 40.1, r8) seats cleanly.
+  // drop 3.0: a SLIGHT downward nudge (not the 3 cm first tried -- 3 cm = 30 mm was far too much).
+  // Bumped 2.5 -> 3.0 after a test fit of the 2.5 mm print: it needed a bit more drop to seat
+  // (~0.5 mm), which is print shrinkage (the PETG window prints slightly higher/smaller than the
+  // model, so the real part wants more drop than the ideal geometry). The window is designed centred
+  // over the plateau (2.75 mm clearance all round); drop shifts it toward the phone centre WITHOUT
+  // resizing. NOTE on the ideal model: at 3.0 mm drop the window's TOP edge sits ~0.25 mm BELOW the
+  // plateau's top edge, i.e. the plate would overlap the top ~0.25 mm of the plateau -- shrinkage
+  // removes that in the actual print. If a fresh print catches at the top edge, back this off toward
+  // 2.5. Bottom clearance ~5.75 mm. More drop stays safe for the two camera-end TPU locators.
+  // MagSafe variant: window bottom still clears the ø58 opening.
+  camera: { top: 3.0, left: 6.425, width: 59.0, height: 34.6, radius: 5.5, drop: 3.0 },
   // Flat through-window, NO raised housing: the 4.89 mm plateau pokes through the 2 mm plate
   // and ~2.9 mm out the back, and the phone body seats flat on the inner face. This lets the
   // door print flat, outer-face-down, with NO supports (teardrop hinge bore self-supports).
-  // Clearance per side: x widened to 2.5 (window 64.0 wide) to compensate for ~2 mm of
-  // measured print undersize on the first print; y stays 1.5 -> window 64.0 x 37.6 mm.
-  cameraClearance: { x: 2.5, y: 1.5 },
+  // Clearance per side: x=2.5 (window 64.0 wide), y=2.75 (window 40.1 tall) -> window 64.0 x
+  // 40.1 mm, corner r8 -- the test-print-confirmed fit (variant A).
+  cameraClearance: { x: 2.5, y: 2.75 },
 };
 
 // MagSafe ring: ø57.50mm, centre 77.74mm from the top edge (drawing page 4).

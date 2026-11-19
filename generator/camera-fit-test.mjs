@@ -1,14 +1,12 @@
 #!/usr/bin/env node
-// Camera-window fit-test coupon: three windows (A/B/C) bracketing the opening size, so you
-// can drop the real iPhone 18 Pro camera plateau into each and see which clears best.
-// Prints flat, outer-face-down, NO supports (same as the door). Labels are DEBOSSED (recessed)
-// so they don't create bumps on the phone-facing face.
+// Camera-window HEIGHT test coupon: three SEPARATE small tiles (A/B/C), same width (64.0 mm)
+// and corner radius (r8, the case-maker value that fixed the too-round shape), bracketing the
+// window HEIGHT to find the one that seats the plateau. Each tile has mouse-ear tabs for bed
+// adhesion. Prints flat, no supports. Labels DEBOSSED. Ears are a thin 0.6 mm pad — snap/trim.
 //
-//   A: 64.0 x 37.60 mm   (current door design)
-//   B: 64.5 x 37.85 mm   (+0.5 wide, +0.25 tall)
-//   C: 65.0 x 38.10 mm   (+1.0 wide, +0.50 tall)
+//   A: 40.1 mm   B: 41.1 mm   C: 42.1 mm   tall      (all 64.0 mm wide, corner r8)
 //
-//   node camera-fit-test.mjs  ->  ../calibration/Camera window fit test A-B-C (PETG, flat).stl
+//   node camera-fit-test.mjs  ->  ../calibration/Camera window height test A-B-C (PETG, tiles).stl
 
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -21,72 +19,70 @@ const { toSTL } = await import(join(DOOR_GEN, 'stl.js'));
 const M = await Module(); M.setup();
 const CS = M.CrossSection;
 
-const T = 3.0;                       // plate thickness
-const WIN_R = 13.5;                  // window corner radius (plateau r12 + 1.5 clearance)
-const SPACING = 48;                  // window centre-to-centre (vertical)
-const VARIANTS = [                   // top -> bottom
-  { id: 'A', w: 64.0, h: 37.60, y:  SPACING },
-  { id: 'B', w: 64.5, h: 37.85, y:  0 },
-  { id: 'C', w: 65.0, h: 38.10, y: -SPACING },
+const T = 3.0;                       // tile thickness
+const LM = 14, RM = 6, VM = 6;       // tile margins: left (label), right, vertical
+const EAR_R = 6, EAR_H = 0.6;        // mouse-ear radius / thickness
+const SPACING = 74;                  // tile centre-to-centre (vertical), clears the ears
+const VARIANTS = [                   // top -> bottom; same width + radius, different height
+  { id: 'A', w: 64.0, h: 40.10, r: 8, y:  SPACING },
+  { id: 'B', w: 64.0, h: 41.10, r: 8, y:  0 },
+  { id: 'C', w: 64.0, h: 42.10, r: 8, y: -SPACING },
 ];
-const PLATE_W = 90, PLATE_H = 150;
-const LETTER_X = -39;                // label column, left of the windows
 
 // --- 2D helpers ---
 function rrect(w, h, r, cx = 0, cy = 0) {
   return CS.square([w - 2 * r, h - 2 * r], true).translate([cx, cy]).offset(r, 'Round', 2, 64);
 }
-// a straight stroke from p1 to p2 of width sw (as a quad polygon, ends extended by sw/2)
-function seg(p1, p2, sw) {
+function seg(p1, p2, sw) {            // straight stroke p1->p2, width sw, wound CCW (solid)
   const [x1, y1] = p1, [x2, y2] = p2;
   const dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy) || 1e-6;
-  const ax = dx / L * sw / 2, ay = dy / L * sw / 2;   // axis half-extension
-  const nx = -dy / L * sw / 2, ny = dx / L * sw / 2;  // perpendicular half-width
-  return new CS([[              // wound CCW so Manifold treats it as solid, not a hole
-    [x1 - ax + nx, y1 - ay + ny],
-    [x1 - ax - nx, y1 - ay - ny],
-    [x2 + ax - nx, y2 + ay - ny],
-    [x2 + ax + nx, y2 + ay + ny],
+  const ax = dx / L * sw / 2, ay = dy / L * sw / 2, nx = -dy / L * sw / 2, ny = dx / L * sw / 2;
+  return new CS([[
+    [x1 - ax + nx, y1 - ay + ny], [x1 - ax - nx, y1 - ay - ny],
+    [x2 + ax - nx, y2 + ay - ny], [x2 + ax + nx, y2 + ay + ny],
   ]]);
 }
 function ring(ro, ri, cx, cy) { return CS.circle(ro, 64).subtract(CS.circle(ri, 64)).translate([cx, cy]); }
-
-// --- letters A B C (centred on origin, ~8 mm tall), stroke 1.3 ---
 function letter(id) {
   const sw = 1.3;
-  if (id === 'A') {
-    return CS.union([
-      seg([-3, -4], [0, 4], sw), seg([0, 4], [3, -4], sw), seg([-1.6, -0.5], [1.6, -0.5], sw),
-    ]);
-  }
+  if (id === 'A') return CS.union([seg([-3, -4], [0, 4], sw), seg([0, 4], [3, -4], sw), seg([-1.6, -0.5], [1.6, -0.5], sw)]);
   if (id === 'B') {
-    let b = seg([-2.5, -4], [-2.5, 4], sw);                 // spine
-    const half = (cy) => ring(2.0, 2.0 - sw, -2.5, cy)      // right half of each bump
-      .intersect(CS.square([6, 4.2], true).translate([-2.5 + 3, cy]));
-    return b.add(half(2.0)).add(half(-2.0));
+    const half = (cy) => ring(2.0, 2.0 - sw, -2.5, cy).intersect(CS.square([6, 4.2], true).translate([0.5, cy]));
+    return seg([-2.5, -4], [-2.5, 4], sw).add(half(2.0)).add(half(-2.0));
   }
-  // C: ring open on the right
-  return ring(3.6, 3.6 - sw, 0, 0)
-    .subtract(CS.square([4, 4.0], true).translate([2.6, 0]));
+  return ring(3.6, 3.6 - sw, 0, 0).subtract(CS.square([4, 4.0], true).translate([2.6, 0]));   // C
 }
 
-// --- build plate ---
+// --- 3D helpers ---
 function prism(cs, za, zb) { return M.Manifold.extrude(cs, zb - za).translate([0, 0, za]); }
-let plate = prism(rrect(PLATE_W, PLATE_H, 4), 0, T);
+function disc(r, h, cx, cy) { return M.Manifold.cylinder(h, r, r, 48).translate([cx, cy, 0]); }
 
-for (const v of VARIANTS) {
-  plate = plate.subtract(prism(rrect(v.w, v.h, WIN_R, 0, v.y), -1, T + 1));          // window through-cut
-  plate = plate.subtract(prism(letter(v.id).translate([LETTER_X, v.y]), T - 1.0, T + 0.2)); // debossed label
+// --- one tile (centred at origin) ---
+function tile(v) {
+  const W = v.w + LM + RM, H = v.h + 2 * VM;
+  const winCx = (LM - RM) / 2;                 // window shifted right to leave a label margin
+  const labelX = winCx - v.w / 2 - 7;
+  let t = prism(rrect(W, H, 4), 0, T);
+  for (const sx of [-1, 1]) for (const sy of [-1, 1]) t = t.add(disc(EAR_R, EAR_H, sx * W / 2, sy * H / 2));  // ears
+  t = t.subtract(prism(rrect(v.w, v.h, v.r, winCx, 0), -1, T + 1));                     // window (per-variant radius)
+  t = t.subtract(prism(letter(v.id).translate([labelX, 0]), T - 1.0, T + 0.2));        // debossed label
+  return t;
 }
 
-const pieces = plate.decompose().length;
-const bb = plate.boundingBox();
-console.log(`fit-test ${plate.volume().toFixed(0)} mm³ | pieces ${pieces} | ` +
-  `bbox ${bb.min.map(v => v.toFixed(1))} .. ${bb.max.map(v => v.toFixed(1))} | ${pieces === 1 ? 'OK' : 'MULTI-PIECE!'}`);
-for (const v of VARIANTS) console.log(`  ${v.id}: ${v.w.toFixed(2)} x ${v.h.toFixed(2)} mm`);
+let part = null;
+for (const v of VARIANTS) {
+  const tl = tile(v).translate([0, v.y, 0]);
+  part = part ? part.add(tl) : tl;
+}
+
+const pieces = part.decompose().length;
+const bb = part.boundingBox();
+console.log(`fit-test ${part.volume().toFixed(0)} mm³ | pieces ${pieces} (want 3) | ` +
+  `bbox ${bb.min.map(v => v.toFixed(1))} .. ${bb.max.map(v => v.toFixed(1))} | ${pieces === 3 ? 'OK' : 'CHECK PIECES'}`);
+for (const v of VARIANTS) console.log(`  ${v.id}: ${v.w.toFixed(2)} x ${v.h.toFixed(2)} mm, corner r${v.r}`);
 
 const OUT = join(HERE, '..', 'calibration');
 mkdirSync(OUT, { recursive: true });
-const file = join(OUT, 'Camera window fit test A-B-C (PETG, flat).stl');
-writeFileSync(file, toSTL(plate));
+const file = join(OUT, 'Camera window height test A-B-C (PETG, tiles).stl');
+writeFileSync(file, toSTL(part));
 console.log('wrote', file);

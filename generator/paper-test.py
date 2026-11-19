@@ -16,10 +16,15 @@ cx     = PW / 2                # page centre x
 top    = 20.0                  # phone top edge, y from page top
 
 PHONE  = dict(w=71.85, h=150.01, r=12.0, t=0.0)  # real phone back (align to this)
-PLATE  = dict(w=59.0,  h=34.6,   r=12.0, t=3.0)  # camera plateau (measured base) — must fit inside
-CLX, CLY = 2.5, 1.5                              # window clearance per side (x widened +1 for shrinkage)
-# window (CUT line) = plateau + clearance -> 64.0 x 37.6 mm opening
-WINDOW = dict(w=PLATE["w"]+2*CLX, h=PLATE["h"]+2*CLY, r=PLATE["r"]+min(CLX,CLY), t=PLATE["t"]-CLY)
+PLATE  = dict(w=59.0,  h=34.6,   r=7.0,  t=3.0)  # camera plateau (measured base, ~r7) — must fit inside
+#                                                 # t = distance from phone top edge to plateau top
+CLX, CLY = 2.5, 2.75                             # window clearance per side (test-print-confirmed, variant A)
+DROP = 3.0                                       # window nudged down 3.0 mm (slight; incl. shrinkage allowance)
+# window (CUT line) = plateau + clearance -> 64.0 x 40.1 mm opening, r8 corners (the r8 is the
+# critical fit value: a too-round window pinches the corners narrower than the plateau). The window
+# is shifted DOWN by DROP, so it is asymmetric over the plateau: ~0.25 mm cover at the top edge,
+# ~5.25 mm clearance at the bottom.
+WINDOW = dict(w=PLATE["w"]+2*CLX, h=PLATE["h"]+2*CLY, r=8.0, t=PLATE["t"]-CLY+DROP)
 MAG    = dict(d=57.5,  t=77.74)                  # MagSafe ring (MagSafe variant)
 
 def rrect(d, **style):
@@ -107,7 +112,7 @@ steps = [
     "How to test:",
     "1.  Print at 100% / Actual Size. Confirm the rulers read 100 mm and 50 mm — if not, fix scale and reprint.",
     "2.  Lay this sheet on the BACK of the phone; line the phone outline up with the real edges and top.",
-    "3.  The camera plateau should sit inside the bold CUT window with a gap all around (~2.5 mm sides, ~1.5 mm top/bottom).",
+    "3.  The camera plateau should sit inside the bold CUT window: ~2.5 mm gap at the sides, and (window dropped 3.0 mm for shrinkage) the window top edge is ~0.25 mm INSIDE the plateau top; bottom gap ~5.75 mm.",
     "4.  Optional: cut out the bold window and check the plateau pokes through cleanly.",
 ]
 for i, s in enumerate(steps):
